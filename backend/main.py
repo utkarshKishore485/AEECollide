@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.sites import router as sites_router
 from backend.routes.dispatch import router as dispatch_router
 from backend.routes.replay import router as replay_router
+import os
 
 app = FastAPI(
     title="Dispatch IQ API",
@@ -14,10 +15,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow frontend dev server
+# CORS
+# - Local dev: default allows everything (easy `localhost` dev)
+# - Prod: set CORS_ORIGINS to comma-separated list (e.g. https://yourapp.vercel.app)
+cors_origins_env = os.getenv("CORS_ORIGINS", "*").strip()
+allow_origins = (
+    ["*"]
+    if cors_origins_env == "*" or cors_origins_env == ""
+    else [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

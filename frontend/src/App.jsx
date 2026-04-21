@@ -3,7 +3,7 @@ import Header from './components/Header'
 import SiteSelectionTab from './components/SiteSelection/SiteSelectionTab'
 import DispatchTab from './components/Dispatch/DispatchTab'
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 
 function App() {
   const [activeTab, setActiveTab] = useState('sites')
