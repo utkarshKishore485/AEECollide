@@ -1,9 +1,6 @@
 import time
-from openai import OpenAI
 from backend.config import OPENAI_API_KEY
 import json
-
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Circuit breaker for quota errors
 _last_quota_error_time = 0
@@ -12,6 +9,9 @@ QUOTA_ERROR_COOLDOWN = 600 # 10 minutes
 def generate_operator_briefing(lmp: float, gas_price: float, spread: float, regime_name: str, confidence: int, forecast_summary: str) -> str:
     """Generate a real-time operator briefing using OpenAI GPT-4o."""
     global _last_quota_error_time
+
+    if not OPENAI_API_KEY:
+        return _fallback_briefing(spread, regime_name, confidence, forecast_summary)
 
     # Check circuit breaker
     if time.time() - _last_quota_error_time < QUOTA_ERROR_COOLDOWN:
@@ -34,6 +34,8 @@ RULES:
 - Contextualize the forecast. If a wind glut is coming and spreads will go negative, warn the operator to prepare to switch to grid power.
 """
     try:
+        from openai import OpenAI
+        client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
